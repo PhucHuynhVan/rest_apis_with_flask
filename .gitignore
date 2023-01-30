@@ -10,7 +10,6 @@ Explore
 
 Branch master was renamed to main.
 github
-/
 gitignore
 Public
 Code
@@ -32,6 +31,7 @@ Latest commit 8e67b94 on Feb 20
 __pycache__/
 *.py[cod]
 *$py.class
+.flaskenv
 
 # C extensions
 *.so
