@@ -28,4 +28,4 @@ jobs:
           pylint app.py
       - name: Black check
         run: |
-          black --check *.py
+          black --check .\resources\*.py *.py
