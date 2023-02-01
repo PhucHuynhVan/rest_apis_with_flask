@@ -13,10 +13,12 @@ item_blp = Blueprint("Items", __name__, description="Operations on item")
 class ItemList(MethodView):
     """Method for Items"""
 
+    @item_blp.response(200, ItemSchema(many=True))
     def get(self):
-        return {"items": list(items.values())}
+        return items.values()
 
     @item_blp.arguments(ItemSchema)
+    @item_blp.response(201)
     def post(self, item_data):
         for item in items.values():
             if (
@@ -28,13 +30,14 @@ class ItemList(MethodView):
         item_id = uuid.uuid4().hex
         item = {**item_data, "id": item_id}
         items[item_id] = item
-        return item, 201
+        return item
 
 
 @item_blp.route("/item/<string:item_id>")
 class Item(MethodView):
     """Method for individual item"""
 
+    @item_blp.response(200, ItemSchema)
     def get(self, item_id):
         try:
             return items[item_id]
@@ -42,6 +45,7 @@ class Item(MethodView):
             abort(404, message="Item not found.")
 
     @item_blp.arguments(ItemUpdateSchema)
+    @item_blp.response(200, ItemSchema)
     def put(self, item_data, item_id):
         try:
             item = items[item_id]

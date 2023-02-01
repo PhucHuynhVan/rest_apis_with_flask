@@ -13,10 +13,12 @@ store_blp = Blueprint("Stores", __name__, description="Operations on store")
 class StoreList(MethodView):
     """Method for Stores"""
 
+    @store_blp.response(200, StoreSchema(many=True))
     def get(self):
-        return {"stores": list(stores.values())}
+        return stores.values()
 
     @store_blp.arguments(StoreSchema)
+    @store_blp.response(201, StoreSchema)
     def post(self, store_date):
         for store in stores.values():
             if store_date["name"] == store["name"]:
@@ -24,13 +26,14 @@ class StoreList(MethodView):
         store_id = uuid.uuid4().hex
         store = {**store_date, "id": store_id}
         stores[store_id] = store
-        return store, 201
+        return store
 
 
 @store_blp.route("/store/<string:store_id>")
 class Store(MethodView):
     """Method for individual store"""
 
+    @store_blp.response(200, StoreSchema)
     def get(self, store_id):
         try:
             return stores[store_id]
@@ -38,6 +41,7 @@ class Store(MethodView):
             abort(404, message="Store not found.")
 
     @store_blp.arguments(StoreUpdateSchema)
+    @store_blp.response(200, StoreSchema)
     def put(self, store_data, store_id):
         try:
             store = stores[store_id]
