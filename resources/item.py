@@ -1,10 +1,10 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
 import uuid
-from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from db import items
+from schemas import ItemSchema, ItemUpdateSchema
 
 item_blp = Blueprint("Items", __name__, description="Operations on item")
 
@@ -16,18 +16,8 @@ class ItemList(MethodView):
     def get(self):
         return {"items": list(items.values())}
 
-    def post(self):
-        item_data = request.get_json()
-        if (
-            "name" not in item_data
-            or "price" not in item_data
-            or "store_id" not in item_data
-        ):
-            abort(
-                400,
-                message="Bad Request. Ensure 'name', 'price', 'store_id' are included in the "
-                "JSON payload",
-            )
+    @item_blp.arguments(ItemSchema)
+    def post(self, item_data):
         for item in items.values():
             if (
                 item_data["name"] == item["name"]
@@ -51,13 +41,8 @@ class Item(MethodView):
         except KeyError:
             abort(404, message="Item not found.")
 
-    def put(self, item_id):
-        item_data = request.get_json()
-        if "name" not in item_data or "price" not in item_data:
-            abort(
-                400,
-                message="Bad Request. Ensure 'name', 'price' are included in the JSON payload.",
-            )
+    @item_blp.arguments(ItemUpdateSchema)
+    def put(self, item_data, item_id):
         try:
             item = items[item_id]
             item |= item_data
