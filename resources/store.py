@@ -18,7 +18,7 @@ class StoreList(MethodView):
 
     @store_blp.response(200, StoreSchema(many=True))
     def get(self):
-        return "stores.values()"
+        return StoreModel.query.all()
 
     @store_blp.arguments(StoreSchema)
     @store_blp.response(201, StoreSchema)
@@ -27,37 +27,35 @@ class StoreList(MethodView):
         try:
             db.session.add(store)
             db.session.commit()
-        except SQLAlchemyError:
-            abort(500, message="An error occurred while creating the store")
         except IntegrityError:
             abort(400, message="A store with that name already exists")
+        except SQLAlchemyError:
+            abort(500, message="An error occurred while creating the store")
         return store
 
 
-# @store_blp.route("/store/<string:store_id>")
-# class Store(MethodView):
-#     """Method for individual store"""
-#
-#     @store_blp.response(200, StoreSchema)
-#     def get(self, store_id):
-#         try:
-#             return stores[store_id]
-#         except KeyError:
-#             abort(404, message="Store not found.")
-#
-#     @store_blp.arguments(StoreUpdateSchema)
-#     @store_blp.response(200, StoreSchema)
-#     def put(self, store_data, store_id):
-#         try:
-#             store = stores[store_id]
-#             store |= store_data
-#             return store
-#         except KeyError:
-#             abort(404, message="Store not found.")
-#
-#     def delete(self, store_id):
-#         try:
-#             del stores[store_id]
-#             return {"message": "Store deleted."}
-#         except KeyError:
-#             abort(404, message="Store not found.")
+@store_blp.route("/store/<string:store_id>")
+class Store(MethodView):
+    """Method for individual store"""
+
+    @store_blp.response(200, StoreSchema)
+    def get(self, store_id):
+        store = StoreModel.query.get_or_404(store_id)
+        return store
+
+    @store_blp.arguments(StoreUpdateSchema)
+    @store_blp.response(200, StoreSchema)
+    def put(self, store_data, store_id):
+        store = StoreModel.query.get_or_404(store_id)
+        if store:
+            store.name = store_data["name"]
+        else:
+            store = StoreModel(id=StoreModel, **store_data)
+
+        db.session.add(store)
+        db.session.commit()
+        return store
+
+    def delete(self, store_id):
+        store = StoreModel.query.get_or_404(store_id)
+        raise NotImplementedError("Deleting an item is not implemented.")
