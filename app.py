@@ -4,7 +4,6 @@ from flask import Flask
 from flask_smorest import Api
 
 from db import db
-
 from resources.item import blp as ItemBlueprint
 from resources.store import blp as StoreBlueprint
 from resources.tag import blp as TagBlueprint
@@ -12,7 +11,6 @@ from resources.tag import blp as TagBlueprint
 
 def create_app(db_url=None):
     app = Flask(__name__)
-
     app.config["API_TITLE"] = "Stores REST API"
     app.config["API_VERSION"] = "v1"
     app.config["OPENAPI_VERSION"] = "3.0.3"
