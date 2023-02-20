@@ -1,8 +1,9 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
+# pylint: disable=unused-variable
 from flask import Flask
 from flask_smorest import Api
-
+from flask_jwt_extended import JWTManager
 from db import db
 from resources.item import blp as ItemBlueprint
 from resources.store import blp as StoreBlueprint
@@ -23,7 +24,11 @@ def create_app(db_url=None):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["PROPAGATE_EXCEPTIONS"] = True
     db.init_app(app)
+
     api = Api(app)
+
+    app.config["JWT_SECRET_KEY"] = "81352174194488610464113835805236371800"
+    jwt = JWTManager(app)
 
     with app.app_context():
         db.create_all()
