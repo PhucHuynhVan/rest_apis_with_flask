@@ -1,7 +1,7 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
 # pylint: disable=unused-variable
-from flask import Flask
+from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 from db import db
@@ -30,6 +30,13 @@ def create_app(db_url=None):
 
     app.config["JWT_SECRET_KEY"] = "81352174194488610464113835805236371800"
     jwt = JWTManager(app)
+
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return (
+            jsonify({"message": "The token has expired.", "error": "token_expired"}),
+            401,
+        )
 
     with app.app_context():
         db.create_all()
